@@ -11,3 +11,12 @@ HashMap 的实现不是同步的，这意味着它不是线程安全的。它的
 比如我们要新增或查找某个元素，我们通过把当前元素的关键字 通过某个函数映射到数组中的某个位置，通过数组下标一次定位就可完成操作。
                        存储位置 = f(关键字)
 其中，这个函数f一般称为哈希函数，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：
+
+
+https://www.cnblogs.com/chengxiao/p/6059914.html
+
+https://blog.csdn.net/zxt0601/article/details/77413921
+
+https://blog.csdn.net/u014026363/article/details/56342142
+
+https://www.cnblogs.com/skywang12345/p/3310835.html
