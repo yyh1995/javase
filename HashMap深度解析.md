@@ -12,4 +12,4 @@ HashMap 的实现不是同步的，这意味着它不是线程安全的。它的
                        存储位置 = f(关键字)
 其中，这个函数f一般称为哈希函数，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：
 
-https://github.com/yyh1995/javase/blob/master/1.png
+![Image text](https://github.com/yyh1995/javase/blob/master/1.png)
