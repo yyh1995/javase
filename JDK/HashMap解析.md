@@ -1,6 +1,6 @@
 # HashMap实现原理及源码分析
 哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表，
-而HashMap的实现原理也常常出现在各类的面试题中，重要性可见一斑。
-HashMap 是一个散列表，它存储的内容是键值对(key-value)映射。
-HashMap 继承于AbstractMap，实现了Map、Cloneable、java.io.Serializable接口。
-HashMap 的实现不是同步的，这意味着它不是线程安全的。它的key、value都可以为null。此外，HashMap中的映射不是有序的。
+而HashMap的实现原理也常常出现在各类的面试题中，重要性可见一斑。</br>
+HashMap 是一个散列表，它存储的内容是键值对(key-value)映射。</br>
+HashMap 继承于AbstractMap，实现了Map、Cloneable、java.io.Serializable接口。</br>
+HashMap 的实现不是同步的，这意味着它不是线程安全的。它的key、value都可以为null。此外，HashMap中的映射不是有序的。</br>
