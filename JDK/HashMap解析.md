@@ -97,3 +97,68 @@ static final class TreeNode<k,v> extends LinkedHashMap.Entry<k,v> {
 }
 ```
 红黑树比链表多了四个变量，parent父节点、left左节点、right右节点、prev上一个同级节点，红黑树内容较多，不在赘述。
+
+### d.总结 
+![](https://github.com/yyh1995/javase/blob/master/pic/x.jpg) 
+
+有了以上3个数据结构，只要有一点数据结构基础的人，都可以大致联想到HashMap的实现了。首先有一个每个元素都是链表（可能表述不准确）的数组，当添加一个元素（key-value）时，就首先计算元素key的hash值，以此确定插入数组中的位置，但是可能存在同一hash值的元素已经被放在数组同一位置了，这时就添加到同一hash值的元素的后面，他们在数组的同一位置，于是形成了链表，所以说数组存放的是链表。而当链表长度太长，大于8时，链表就转换为红黑树，这样大大提高了查找的效率。
+
+### 3.源码分析  
+
+## a.类的属性
+```java
+public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneable, Serializable {
+    // 序列号
+    private static final long serialVersionUID = 362498820763181265L;    
+    // 默认的初始容量是16
+    static final int DEFAULT_INITIAL_CAPACITY = 1 << 4;   
+    // 最大容量
+    static final int MAXIMUM_CAPACITY = 1 << 30; 
+    // 默认的填充因子
+    static final float DEFAULT_LOAD_FACTOR = 0.75f;
+    // 当桶(bucket)上的结点数大于这个值时会转成红黑树
+    static final int TREEIFY_THRESHOLD = 8; 
+    // 当桶(bucket)上的结点数小于这个值时树转链表
+    static final int UNTREEIFY_THRESHOLD = 6;
+    // 桶中结构转化为红黑树对应的table的最小大小
+    static final int MIN_TREEIFY_CAPACITY = 64;
+    // 存储元素的数组，总是2的幂次倍
+    transient Node<k,v>[] table; 
+    // 存放具体元素的集
+    transient Set<map.entry<k,v>> entrySet;
+    // 存放元素的个数，注意这个不等于数组的长度。
+    transient int size;
+    // 每次扩容和更改map结构的计数器
+    transient int modCount;   
+    // 临界值 当实际大小(容量*填充因子)超过临界值时，会进行扩容
+    int threshold;
+    // 填充因子
+    final float loadFactor;
+}
+```
+### b.构造方法
+```java
+/** 构造方法 1 */
+public HashMap() {
+    this.loadFactor = DEFAULT_LOAD_FACTOR; // all other fields defaulted
+}
+
+/** 构造方法 2 */
+public HashMap(int initialCapacity) {
+    this(initialCapacity, DEFAULT_LOAD_FACTOR);
+}
+
+/** 构造方法 3 */
+public HashMap(int initialCapacity, float loadFactor) {
+    if (initialCapacity < 0)
+        throw new IllegalArgumentException("Illegal initial capacity: " +
+                                           initialCapacity);
+    if (initialCapacity > MAXIMUM_CAPACITY)
+        initialCapacity = MAXIMUM_CAPACITY;
+    if (loadFactor <= 0 || Float.isNaN(loadFactor))
+        throw new IllegalArgumentException("Illegal load factor: " +
+                                           loadFactor);
+    this.loadFactor = loadFactor;
+    this.threshold = tableSizeFor(initialCapacity);
+}
+```
