@@ -281,4 +281,119 @@ System.out.println(map.put("a", "AA")); // 打印A
 System.out.println(map.put("a", "AB")); // 打印AA
 ```
 
+#### 3.数据提取get(Object key)
+```java
+public V get(Object key) {
+    Node<k,v> e;
+    return (e = getNode(hash(key), key)) == null ? null : e.value;
+}
+
+final Node<K,V> getNode(int hash, Object key) {
+    Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
+    // table已经初始化，长度大于0，根据hash寻找table中的项也不为空
+    if ((tab = table) != null && (n = tab.length) > 0 &&
+        (first = tab[(n - 1) & hash]) != null) {
+        // 桶中第一项(数组元素)相等
+        if (first.hash == hash && // always check first node
+            ((k = first.key) == key || (key != null && key.equals(k))))
+            return first;
+        // 桶中不止一个结点
+        if ((e = first.next) != null) {
+            // 为红黑树结点
+            if (first instanceof TreeNode)
+                // 在红黑树中查找
+                return ((TreeNode<K,V>)first).getTreeNode(hash, key);
+            // 否则，在链表中查找
+            do {
+                if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                    return e;
+            } while ((e = e.next) != null);
+        }
+    }
+    return null;
+}
+```
+
+#### 4.resize方法
+```java
+final Node<K,V>[] resize() {
+    Node<K,V>[] oldTab = table;//oldTab指向hash桶数组
+    int oldCap = (oldTab == null) ? 0 : oldTab.length;
+    int oldThr = threshold;
+    int newCap, newThr = 0;
+    if (oldCap > 0) {//如果oldCap不为空的话，就是hash桶数组不为空
+        if (oldCap >= MAXIMUM_CAPACITY) {//如果大于最大容量了，就赋值为整数最大的阀值
+            threshold = Integer.MAX_VALUE;
+            return oldTab;//返回
+        }//如果当前hash桶数组的长度在扩容后仍然小于最大容量 并且oldCap大于默认值16
+        else if ((newCap = oldCap << 1) < MAXIMUM_CAPACITY &&
+                 oldCap >= DEFAULT_INITIAL_CAPACITY)
+            newThr = oldThr << 1; // double threshold 双倍扩容阀值threshold
+    }
+    else if (oldThr > 0) // initial capacity was placed in threshold
+        newCap = oldThr;
+    else {               // zero initial threshold signifies using defaults
+        newCap = DEFAULT_INITIAL_CAPACITY;
+        newThr = (int)(DEFAULT_LOAD_FACTOR * DEFAULT_INITIAL_CAPACITY);
+    }
+    if (newThr == 0) {
+        float ft = (float)newCap * loadFactor;
+        newThr = (newCap < MAXIMUM_CAPACITY && ft < (float)MAXIMUM_CAPACITY ?
+                  (int)ft : Integer.MAX_VALUE);
+    }
+    threshold = newThr;
+    @SuppressWarnings({"rawtypes","unchecked"})
+        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];//新建hash桶数组
+    table = newTab;//将新数组的值复制给旧的hash桶数组
+    if (oldTab != null) {//进行扩容操作，复制Node对象值到新的hash桶数组
+        for (int j = 0; j < oldCap; ++j) {
+            Node<K,V> e;
+            if ((e = oldTab[j]) != null) {//如果旧的hash桶数组在j结点处不为空，复制给e
+                oldTab[j] = null;//将旧的hash桶数组在j结点处设置为空，方便gc
+                if (e.next == null)//如果e后面没有Node结点
+                    newTab[e.hash & (newCap - 1)] = e;//直接对e的hash值对新的数组长度求模获得存储位置
+                else if (e instanceof TreeNode)//如果e是红黑树的类型，那么添加到红黑树中
+                    ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                else { // preserve order
+                    Node<K,V> loHead = null, loTail = null;
+                    Node<K,V> hiHead = null, hiTail = null;
+                    Node<K,V> next;
+                    do {
+                        next = e.next;//将Node结点的next赋值给next
+                        if ((e.hash & oldCap) == 0) {//如果结点e的hash值与原hash桶数组的长度作与运算为0
+                            if (loTail == null)//如果loTail为null
+                                loHead = e;//将e结点赋值给loHead
+                            else
+                                loTail.next = e;//否则将e赋值给loTail.next
+                            loTail = e;//然后将e复制给loTail
+                        }
+                        else {//如果结点e的hash值与原hash桶数组的长度作与运算不为0
+                            if (hiTail == null)//如果hiTail为null
+                                hiHead = e;//将e赋值给hiHead
+                            else
+                                hiTail.next = e;//如果hiTail不为空，将e复制给hiTail.next
+                            hiTail = e;//将e复制个hiTail
+                        }
+                    } while ((e = next) != null);//直到e为空
+                    if (loTail != null) {//如果loTail不为空
+                        loTail.next = null;//将loTail.next设置为空
+                        newTab[j] = loHead;//将loHead赋值给新的hash桶数组[j]处
+                    }
+                    if (hiTail != null) {//如果hiTail不为空
+                        hiTail.next = null;//将hiTail.next赋值为空
+                        newTab[j + oldCap] = hiHead;//将hiHead赋值给新的hash桶数组[j+旧hash桶数组长度]
+                    }
+                }
+            }
+        }
+    }
+    return newTab;
+}
+```
+①.在jdk1.8中，resize方法是在hashmap中的键值对大于阀值时或者初始化时，就调用resize方法进行扩容；  
+②.每次扩展的时候，都是扩展2倍；  
+③.扩展后Node对象的位置要么在原位置，要么移动到原偏移量两倍的位置。  
+
+
 
