@@ -103,9 +103,9 @@ static final class TreeNode<k,v> extends LinkedHashMap.Entry<k,v> {
 
 有了以上3个数据结构，只要有一点数据结构基础的人，都可以大致联想到HashMap的实现了。首先有一个每个元素都是链表（可能表述不准确）的数组，当添加一个元素（key-value）时，就首先计算元素key的hash值，以此确定插入数组中的位置，但是可能存在同一hash值的元素已经被放在数组同一位置了，这时就添加到同一hash值的元素的后面，他们在数组的同一位置，于是形成了链表，所以说数组存放的是链表。而当链表长度太长，大于8时，链表就转换为红黑树，这样大大提高了查找的效率。
 
-### 3.源码分析  
+## 3.源码分析  
 
-## a.类的属性
+### a.类的属性
 ```java
 public class HashMap<K,V> extends AbstractMap<K,V> implements Map<K,V>, Cloneable, Serializable {
     // 序列号
@@ -162,3 +162,123 @@ public HashMap(int initialCapacity, float loadFactor) {
     this.threshold = tableSizeFor(initialCapacity);
 }
 ```
+
+### c.方法解析
+
+
+#### 1.hash算法  
+```java
+static final int hash(Object key) {
+    int h;
+    return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+}
+```   
+首先获取对象的hashCode()值，然后将hashCode值右移16位，然后将右移后的值与原来的hashCode做异或运算，返回结果。（其中h>>>16，在JDK1.8中，优化了高位运算的算法，使用了零扩展，无论正数还是负数，都在高位插入0）。   
+
+
+#### 2.数据存储 put(key，value)
+```java  
+public V put(K key, V value) {
+    // 对key的hashCode()做hash 
+    return putVal(hash(key), key, value, false, true);  
+} 
+
+final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
+                   boolean evict) {
+    Node<K,V>[] tab; Node<K,V> p; int n, i;
+    // 步骤①：tab为空则创建 
+    // table未初始化或者长度为0，进行扩容
+    if ((tab = table) == null || (n = tab.length) == 0)
+        n = (tab = resize()).length;
+    // 步骤②：计算index，并对null做处理  
+    // (n - 1) & hash 确定元素存放在哪个桶中，桶为空，新生成结点放入桶中(此时，这个结点是放在数组中)
+    if ((p = tab[i = (n - 1) & hash]) == null)
+        tab[i] = newNode(hash, key, value, null);
+    // 桶中已经存在元素
+    else {
+        Node<K,V> e; K k;
+        // 步骤③：节点key存在，直接覆盖value 
+        // 比较桶中第一个元素(数组中的结点)的hash值相等，key相等
+        if (p.hash == hash &&
+            ((k = p.key) == key || (key != null && key.equals(k))))
+                // 将第一个元素赋值给e，用e来记录
+                e = p;
+        // 步骤④：判断该链为红黑树 
+        // hash值不相等，即key不相等；为红黑树结点
+        else if (p instanceof TreeNode)
+            // 放入树中
+            e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+        // 步骤⑤：该链为链表 
+        // 为链表结点
+        else {
+            // 在链表最末插入结点
+            for (int binCount = 0; ; ++binCount) {
+                // 到达链表的尾部
+                if ((e = p.next) == null) {
+                    // 在尾部插入新结点
+                    p.next = newNode(hash, key, value, null);
+                    // 结点数量达到阈值，转化为红黑树
+                    if (binCount >= TREEIFY_THRESHOLD - 1) // -1 for 1st
+                        treeifyBin(tab, hash);
+                    // 跳出循环
+                    break;
+                }
+                // 判断链表中结点的key值与插入的元素的key值是否相等
+                if (e.hash == hash &&
+                    ((k = e.key) == key || (key != null && key.equals(k))))
+                    // 相等，跳出循环
+                    break;
+                // 用于遍历桶中的链表，与前面的e = p.next组合，可以遍历链表
+                p = e;
+            }
+        }
+        // 表示在桶中找到key值、hash值与插入元素相等的结点
+        if (e != null) { 
+            // 记录e的value
+            V oldValue = e.value;
+            // onlyIfAbsent为false或者旧值为null
+            if (!onlyIfAbsent || oldValue == null)
+                //用新值替换旧值
+                e.value = value;
+            // 访问后回调
+            afterNodeAccess(e);
+            // 返回旧值
+            return oldValue;
+        }
+    }
+    // 结构性修改
+    ++modCount;
+    // 步骤⑥：超过最大容量 就扩容 
+    // 实际大小大于阈值则扩容
+    if (++size > threshold)
+        resize();
+    // 插入后回调
+    afterNodeInsertion(evict);
+    return null;
+}
+``` 
+
+HashMap的数据存储实现原理  
+流程：  
+   
+1. 根据key计算得到key.hash = (h = k.hashCode()) ^ (h >>> 16)；  
+
+2. 根据key.hash计算得到桶数组的索引index = key.hash & (table.length - 1)，这样就找到该key的存放位置了：  
+
+① 如果该位置没有数据，用该数据新生成一个节点保存新数据，返回null；  
+
+② 如果该位置有数据是一个红黑树，那么执行相应的插入 / 更新操作；  
+
+③ 如果该位置有数据是一个链表，分两种情况一是该链表没有这个节点，另一个是该链表上有这个节点，注意这里判断的依据是key.hash是否一样：  
+
+如果该链表没有这个节点，那么采用尾插法新增节点保存新数据，返回null；如果该链表已经有这个节点了，那么找到该节点并更新新数据，返回老数据。  
+
+**HashMap的put会返回key的上一次保存的数据**，比如：
+```java
+HashMap<String, String> map = new HashMap<String, String>();
+System.out.println(map.put("a", "A")); // 打印null
+System.out.println(map.put("a", "AA")); // 打印A
+System.out.println(map.put("a", "AB")); // 打印AA
+```
+
+
