@@ -11,7 +11,27 @@
   
 ## 2.ArrayList源码分析
 
-### 类的属性  
+### a.类的属性  
+```java
+
+public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAccess, Cloneable, Serializable {
+	// 序列化id
+	private static final long serialVersionUID = 8683452581122892189L;
+	// 默认大小为10,实际上调用无参构造函数初始化时,存放数据的数据是个空数组,调用add时才会真正初始化.
+	private static final int DEFAULT_CAPACITY = 10;
+	// 一个空对象
+	private static final Object[] EMPTY_ELEMENTDATA = {};
+	// 一个空对象，如果使用默认构造函数创建，则默认对象内容默认是该值
+	private static final Object[] DEFAULTCAPACITY_EMPTY_ELEMENTDATA ={};
+	// 真正存放数据的数组，当前对象不参与序列化
+	transient Object[] elementData;
+	// 当前数组长度
+	private int size;
+ 
+	// 省略方法。。
+}
+```
+### b.构造方法  
 
 
 
