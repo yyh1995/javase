@@ -7,7 +7,7 @@
   ArrayList是**线程不安全**当多条线程访问同一个ArrayList集合时，程序需要手动保证该集合的同步性，而Vector则是线程安全的。  
   
 ## 1.ArrayList实现原理    
-  ![](https://github.com/yyh1995/javase/blob/master/pic/616953-20160322185210151-491440543.png)   
+  ![image](https://github.com/yyh1995/javase/blob/master/pic/616953-20160322185210151-491440543.png)   
   底层的数据结构就是数组，数组元素类型为Object类型，即可以存放所有类型数据。我们对ArrayList类的实例的所有的操作底层都是基于数组的。
   
 ## 2.ArrayList源码分析
