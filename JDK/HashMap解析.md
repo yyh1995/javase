@@ -12,7 +12,7 @@
 **存储位置 = f(关键字)**  
 
   其中，这个函数f一般称为哈希函数，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：  
-![](https://github.com/yyh1995/javase/blob/master/pic/1.png)
+![image](https://github.com/yyh1995/javase/blob/master/pic/1.png)
 查找操作同理，先通过哈希函数计算出实际存储地址，然后从数组中对应地址取出即可。
 
 ### 哈希冲突 
@@ -99,7 +99,7 @@ static final class TreeNode<k,v> extends LinkedHashMap.Entry<k,v> {
 红黑树比链表多了四个变量，parent父节点、left左节点、right右节点、prev上一个同级节点，红黑树内容较多，不在赘述。
 
 ### d.总结 
-![](https://github.com/yyh1995/javase/blob/master/pic/x.jpg) 
+![image](https://github.com/yyh1995/javase/blob/master/pic/x.jpg) 
 
 有了以上3个数据结构，只要有一点数据结构基础的人，都可以大致联想到HashMap的实现了。首先有一个每个元素都是链表（可能表述不准确）的数组，当添加一个元素（key-value）时，就首先计算元素key的hash值，以此确定插入数组中的位置，但是可能存在同一hash值的元素已经被放在数组同一位置了，这时就添加到同一hash值的元素的后面，他们在数组的同一位置，于是形成了链表，所以说数组存放的是链表。而当链表长度太长，大于8时，链表就转换为红黑树，这样大大提高了查找的效率。
 
