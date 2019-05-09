@@ -78,8 +78,7 @@ public ArrayList(Collection<? extends E> c) { // 集合参数构造函数
         return true;
     }
 ```
-在add函数我们发现还有其他的函数ensureCapacityInternal，此函数可以理解为确保elementData数组有合适的大小。
-**ensureCapacityInternal**的具体函数如下：  
+在add函数我们发现还有其他的函数ensureCapacityInternal，此函数可以理解为确保elementData数组有合适的大小。**ensureCapacityInternal**的具体函数如下：  
 ```java
 private void ensureCapacityInternal(int minCapacity) {
         if (elementData == DEFAULTCAPACITY_EMPTY_ELEMENTDATA) { // 判断元素数组是否为空数组
@@ -89,8 +88,7 @@ private void ensureCapacityInternal(int minCapacity) {
         ensureExplicitCapacity(minCapacity);
     }
 ```
-在ensureCapacityInternal函数中我们又发现了ensureExplicitCapacity函数，这个函数也是为了确保elemenData数组有合适的大小。  
-**ensureExplicitCapacity**的具体函数如下：  
+在ensureCapacityInternal函数中我们又发现了ensureExplicitCapacity函数，这个函数也是为了确保elemenData数组有合适的大小。**ensureExplicitCapacity**的具体函数如下：  
 ```java
 private void ensureExplicitCapacity(int minCapacity) {
         // 结构性修改加1
@@ -99,10 +97,7 @@ private void ensureExplicitCapacity(int minCapacity) {
             grow(minCapacity);
     }
  ```
-在ensureExplicitCapacity函数我们又发现了grow函数，grow函数才会对数组进行扩容，
-ensureCapacityInternal、ensureExplicitCapacity都只是过程，  
-最后完成实际扩容操作还是得看grow函数
-grow函数的具体函数如下  
+在ensureExplicitCapacity函数我们又发现了grow函数，grow函数才会对数组进行扩容，ensureCapacityInternal、ensureExplicitCapacity都只是过程，最后完成实际扩容操作还是得看grow函数。**grow**函数的具体函数如下：  
 ```java
 private void grow(int minCapacity) {
         int oldCapacity = elementData.length; // 旧容量
