@@ -6,8 +6,9 @@
   ArrayList 实现java.io.Serializable接口，这意味着ArrayList支持序列化，能通过序列化去传输。  
   ArrayList是**线程不安全**当多条线程访问同一个ArrayList集合时，程序需要手动保证该集合的同步性，而Vector则是线程安全的。  
   
-## 1.ArrayList实现原理  
-  ArrayList 底层其实就是数组去保存数据的。
+## 1.ArrayList实现原理    
+  ![](https://github.com/yyh1995/javase/blob/master/pic/616953-20160322185210151-491440543.png)   
+  底层的数据结构就是数组，数组元素类型为Object类型，即可以存放所有类型数据。我们对ArrayList类的实例的所有的操作底层都是基于数组的。
   
 ## 2.ArrayList源码分析
 
@@ -34,16 +35,17 @@ public class ArrayList<E> extends AbstractList<E> implements List<E>, RandomAcce
 ### b.构造方法  
 ```java
 public ArrayList() {
+                //调用无参构造函数初始化时,存放数据的数据是个空数组,调用add时才会真正初始化
 		this.elementData = DEFAULTCAPACITY_EMPTY_ELEMENTDATA;
 	}
 	
 	
 public ArrayList(int initialCapacity) {
-        if (initialCapacity > 0) {
+        if (initialCapacity > 0) {   //初始容量大于0
             this.elementData = new Object[initialCapacity];
-        } else if (initialCapacity == 0) {
-            this.elementData = EMPTY_ELEMENTDATA;
-        } else {
+        } else if (initialCapacity == 0) {  // 初始容量为0 
+            this.elementData = EMPTY_ELEMENTDATA;    // 为空对象数组
+        } else {   // 初始容量小于0，抛出异常
             throw new IllegalArgumentException("Illegal Capacity: "+
                                                initialCapacity);
         }
